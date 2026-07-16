@@ -32,6 +32,9 @@ var (
 	DriveSvc    *service.GoogleDriveService
 	CalendarSvc *service.GoogleCalendarService
 
+	// AI 生成服务（nil = 未配置 API key，gen 命令不可用）
+	GenSvc *service.CourseworkService
+
 	// 全局 rootCmd，REPL 复用
 	rootCmd *cobra.Command
 )
@@ -61,6 +64,9 @@ func Init() {
 	HeatSvc = service.NewHeatmapService(cfg, RecordSvc)
 	StreakSvc = service.NewStreakService(cfg, RecordSvc)
 	DashSvc = service.NewDashboardService(cfg, ExamSvc, SubjSvc, WpSvc, RecordSvc, DiarySvc)
+
+	// 初始化 AI 生成服务（需要 Python 3.10+ 环境）
+	GenSvc = service.NewCourseworkService(cfg)
 
 	// 初始化 Google 服务（可选 — 未配置时静默跳过）
 	googleClient, err := auth.NewHTTPClient(context.Background(), config.GoogleScopes())
@@ -119,6 +125,7 @@ func buildRootCmd() *cobra.Command {
 	cmd.AddCommand(newDriveCmd())
 	cmd.AddCommand(newCalendarCmd())
 	cmd.AddCommand(newPathCmd())
+	cmd.AddCommand(newGenCmd())
 
 	return cmd
 }

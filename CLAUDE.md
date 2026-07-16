@@ -160,3 +160,6 @@ git commit -m "<简短描述本次改动>"
 
 - `PROJECT_FEATURES_AND_PHILOSOPHY.md` — 完整需求规格、设计哲学、用户场景
 - 原项目代码 — 基本无复用价值，仅作功能参考
+
+
+# 全程用中文交流

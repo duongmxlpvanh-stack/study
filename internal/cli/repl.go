@@ -129,6 +129,7 @@ func executeREPLCommand(input string) {
 	"cala": {"calendar", "add"},
 	"call": {"calendar", "list"},
 	"cals": {"calendar", "status"},
+	"g":    {"gen"},
 	}
 
 	// 展开别名

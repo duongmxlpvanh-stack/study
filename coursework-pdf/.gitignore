@@ -1,0 +1,10 @@
+.env
+.sectioncache/
+*.aux
+*.out
+*.toc
+*.log
+*.xdv
+*.pdf
+__pycache__/
+.tectonic/

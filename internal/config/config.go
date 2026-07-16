@@ -53,6 +53,7 @@ func (c *Config) EnsureDirs() error {
 		c.DataDir,
 		filepath.Join(c.DataDir, "records"),
 		filepath.Join(c.DataDir, "materials"),
+		filepath.Join(c.DataDir, "gen", "output"),
 	}
 	for _, d := range dirs {
 		if err := os.MkdirAll(d, 0755); err != nil {
@@ -100,4 +101,16 @@ func (c *Config) WeakPointsPath() string {
 // MemosPath 备忘文件路径
 func (c *Config) MemosPath() string {
 	return filepath.Join(c.DataDir, "memos.md")
+}
+
+// GenOutputDir 生成 PDF 输出目录
+func (c *Config) GenOutputDir() string {
+	return filepath.Join(c.DataDir, "gen", "output")
+}
+
+// PythonProjectDir 返回 Python 项目根目录（相对于可执行文件）
+// 编译后 study.exe 与 coursework-pdf/ 在同一目录；
+// 开发时 go run 从项目根目录运行。
+func (c *Config) PythonProjectDir() string {
+	return "coursework-pdf"
 }

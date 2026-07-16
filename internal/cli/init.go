@@ -164,6 +164,31 @@ func runInitWizard() error {
 	fmt.Println(render.Dim("  整个目录复制到新电脑即可迁移所有数据。"))
 	fmt.Println()
 
+	// 附加步骤：添加到系统 PATH
+	fmt.Println(render.Section("⚡ 附加步骤: 添加到系统 PATH"))
+	fmt.Println(render.Dim("  将 study.exe 所在目录添加到用户 PATH 后，"))
+	fmt.Println(render.Dim("  你可以在任意终端中直接输入 study 来启动。"))
+	fmt.Println()
+
+	fmt.Printf("  是否添加到 PATH？(y/N): ")
+	addPathAnswer, _ := reader.ReadString('\n')
+	addPathAnswer = strings.TrimSpace(strings.ToLower(addPathAnswer))
+
+	if addPathAnswer == "y" || addPathAnswer == "yes" {
+		added, err := AddToPath()
+		if err != nil {
+			fmt.Printf("  %s 添加 PATH 失败: %v\n", render.Red("❌"), err)
+		} else if !added {
+			fmt.Printf("  %s study 已在 PATH 中，无需重复添加\n", render.Green("✅"))
+		} else {
+			fmt.Printf("  %s 已添加到用户 PATH\n", render.Green("✅"))
+			fmt.Println(render.Dim("  请重新打开终端以使 PATH 生效。"))
+		}
+	} else {
+		fmt.Println(render.Dim("  已跳过。可稍后手动将 study.exe 目录添加到 PATH。"))
+	}
+	fmt.Println()
+
 	// 完成
 	fmt.Println(render.Green("🎉 设置完成！"))
 	fmt.Println()

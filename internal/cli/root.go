@@ -118,6 +118,7 @@ func buildRootCmd() *cobra.Command {
 	cmd.AddCommand(newGoogleAuthCmd())
 	cmd.AddCommand(newDriveCmd())
 	cmd.AddCommand(newCalendarCmd())
+	cmd.AddCommand(newPathCmd())
 
 	return cmd
 }

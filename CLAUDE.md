@@ -145,17 +145,18 @@ study/
 
 **远程仓库**: `https://github.com/duongmxlpvanh-stack/study.git`（已关联 `origin`）
 
-**规则：每次代码更改后必须提交**，做好版本管理，保持提交历史清晰可追溯。
+**规则：每次代码更改后必须提交并推送到远程仓库**，做好版本管理，保持提交历史清晰可追溯。
 
 ```bash
 # 每次修改完代码后执行：
 git add -A
 git commit -m "<简短描述本次改动>"
+git push
 ```
 
 - 提交粒度：每完成一个有意义的改动就提交一次（一个功能点、一个修复、一个重构）
 - 提交信息用中文，简洁描述改动内容
-- 推送前先拉取远程变更：`git pull --rebase`
+- 推送前先拉取远程变更：若 push 被拒绝，执行 `git pull --rebase` 后再 push
 - 功能分支 → PR → squash merge
 
 ## 参考文档

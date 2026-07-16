@@ -82,6 +82,11 @@ func printREPLHelp() {
 	fmt.Println("  help / h / ?            显示此帮助")
 	fmt.Println("  exit / quit / q         退出")
 	fmt.Println()
+	fmt.Println(render.Dim("  Google 服务"))
+	fmt.Println("  google login / gl       登录 Google 账号")
+	fmt.Println("  google logout / glo     退出 Google 账号")
+	fmt.Println("  google status / gst     查看认证状态")
+	fmt.Println()
 }
 
 // executeREPLCommand 解析并执行 REPL 命令
@@ -103,6 +108,9 @@ func executeREPLCommand(input string) {
 		"hm": {"heatmap"},
 		"sk": {"streak"},
 		"dj": {"diary"},
+		"gl":  {"google", "login"},
+		"glo": {"google", "logout"},
+		"gst": {"google", "status"},
 	}
 
 	// 展开别名

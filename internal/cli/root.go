@@ -94,6 +94,7 @@ func buildRootCmd() *cobra.Command {
 	cmd.AddCommand(newHeatmapCmd())
 	cmd.AddCommand(newStreakCmd())
 	cmd.AddCommand(newInitCmd())
+	cmd.AddCommand(newGoogleAuthCmd())
 
 	return cmd
 }

@@ -5,6 +5,20 @@ import (
 	"path/filepath"
 )
 
+// Google OAuth 相关常量
+const (
+	// GoogleOAuthRedirectFmt OAuth2 回调地址模板（%d 为端口号）
+	GoogleOAuthRedirectFmt = "http://127.0.0.1:%d/callback"
+)
+
+// GoogleScopes 返回所有 Google 服务所需的 OAuth2 权限范围
+func GoogleScopes() []string {
+	return []string{
+		"https://www.googleapis.com/auth/drive.file",       // Drive: 仅访问本应用创建的文件
+		"https://www.googleapis.com/auth/calendar.events",  // Calendar: 读写事件
+	}
+}
+
 // Config 应用配置
 type Config struct {
 	DataDir string // 数据根目录

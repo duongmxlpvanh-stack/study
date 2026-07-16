@@ -2,11 +2,14 @@ package cli
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"strings"
 	"time"
 
+	"study/internal/auth"
+	"study/internal/config"
 	"study/internal/render"
 
 	"github.com/spf13/cobra"
@@ -45,7 +48,7 @@ func runInitWizard() error {
 	fmt.Println()
 
 	// 2. 添加课程
-	fmt.Println(render.Section("📚 步骤 1/3: 添加本学期课程"))
+	fmt.Println(render.Section("📚 步骤 1/4: 添加本学期课程"))
 	fmt.Println(render.Dim("  输入课程名称，一行一个。输入空行结束。"))
 	fmt.Println(render.Dim("  例如: 高等数学、大学物理、线性代数"))
 
@@ -65,7 +68,7 @@ func runInitWizard() error {
 	fmt.Println()
 
 	// 3. 添加考试
-	fmt.Println(render.Section("⏰ 步骤 2/3: 添加考试日期"))
+	fmt.Println(render.Section("⏰ 步骤 2/4: 添加考试日期"))
 	fmt.Println(render.Dim("  输入考试名称和日期（YYYY-MM-DD），输入空行结束。"))
 	fmt.Println(render.Dim("  例如: 期末考试 2026-07-15"))
 
@@ -99,8 +102,63 @@ func runInitWizard() error {
 	}
 	fmt.Println()
 
+	// 3. 配置 Google 集成（可选）
+	fmt.Println(render.Section("🔗 步骤 3/4: 连接 Google 服务（可选）"))
+	fmt.Println(render.Dim("  连接后可上传文件到 Google Drive 并同步学习计划到 Google Calendar。"))
+	fmt.Println(render.Dim("  需要 Google Cloud Console 中的 OAuth 2.0 客户端凭据（桌面应用类型）。"))
+	fmt.Println(render.Dim("  输入空行跳过此步骤，之后可随时用 study google login 配置。"))
+	fmt.Println()
+
+	fmt.Printf("  是否配置 Google 集成？(y/N): ")
+	answer, _ := reader.ReadString('\n')
+	answer = strings.TrimSpace(strings.ToLower(answer))
+
+	if answer == "y" || answer == "yes" {
+		fmt.Println()
+		fmt.Println(render.Dim("  请按以下步骤获取凭据："))
+		fmt.Println(render.Dim("  1. 前往 https://console.cloud.google.com/"))
+		fmt.Println(render.Dim("  2. 创建项目 → 启用 Drive API + Calendar API"))
+		fmt.Println(render.Dim("  3. API 和服务 → 凭据 → 创建 OAuth 2.0 客户端 ID"))
+		fmt.Println(render.Dim("  4. 应用类型选择「桌面应用」"))
+		fmt.Println()
+
+		fmt.Printf("  Client ID: ")
+		clientID, _ := reader.ReadString('\n')
+		clientID = strings.TrimSpace(clientID)
+
+		if clientID != "" {
+			fmt.Printf("  Client Secret: ")
+			clientSecret, _ := reader.ReadString('\n')
+			clientSecret = strings.TrimSpace(clientSecret)
+
+			if clientSecret != "" {
+				if err := auth.SaveClientIDSecret(clientID, clientSecret); err != nil {
+					fmt.Printf("  %s 保存凭据失败: %v\n", render.Red("❌"), err)
+				} else {
+					fmt.Printf("  %s 凭据已安全保存到 Windows 凭据管理器\n", render.Green("✅"))
+
+					// 立即发起 OAuth 授权
+					fmt.Println()
+					fmt.Println(render.Dim("  正在启动浏览器进行授权..."))
+					ctx := context.Background()
+					_, err := auth.NewHTTPClient(ctx, config.GoogleScopes())
+					if err != nil {
+						fmt.Printf("  %s 授权失败: %v\n", render.Red("❌"), err)
+						fmt.Println(render.Dim("  可稍后使用 study google login 重新授权"))
+					} else {
+						fmt.Printf("  %s Google 授权成功！\n", render.Green("✅"))
+						fmt.Println(render.Dim("  提示: Google 服务将在下次启动 study 时可用"))
+					}
+				}
+			}
+		}
+	} else {
+		fmt.Println(render.Dim("  已跳过 Google 集成。可稍后使用 study google login 配置。"))
+	}
+	fmt.Println()
+
 	// 4. 数据目录确认
-	fmt.Println(render.Section("📁 步骤 3/3: 数据存储位置"))
+	fmt.Println(render.Section("📁 步骤 4/4: 数据存储位置"))
 	fmt.Printf("  当前数据目录: %s\n", render.Bold(cfg.DataDir))
 	fmt.Println(render.Dim("  如需修改，可设置环境变量 STUDY_DATA_DIR"))
 	fmt.Println(render.Dim("  整个目录复制到新电脑即可迁移所有数据。"))

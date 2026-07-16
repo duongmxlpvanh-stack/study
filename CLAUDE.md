@@ -143,10 +143,18 @@ study/
 
 ## Git 工作流
 
+**规则：每次代码更改后必须提交**，做好版本管理，保持提交历史清晰可追溯。
+
 ```bash
-git init && git add -A && git commit -m "初始化 MVP 骨架"
-# 后续：功能分支 → PR → squash merge
+# 每次修改完代码后执行：
+git add -A
+git commit -m "<简短描述本次改动>"
 ```
+
+- 提交粒度：每完成一个有意义的改动就提交一次（一个功能点、一个修复、一个重构）
+- 提交信息用中文，简洁描述改动内容
+- 推送前先拉取远程变更：`git pull --rebase`
+- 功能分支 → PR → squash merge
 
 ## 参考文档
 

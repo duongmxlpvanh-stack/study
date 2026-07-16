@@ -56,8 +56,9 @@ func newDriveCmd() *cobra.Command {
 			}
 
 			ctx := context.Background()
-			fmt.Printf("正在上传 %s 到 Google Drive...\n", filepath.Base(absPath))
+			spinner := render.StartSpinner("正在上传 " + filepath.Base(absPath) + " 到 Google Drive...")
 			fileID, err := DriveSvc.UploadFile(ctx, absPath, subject)
+			spinner.Stop()
 			if err != nil {
 				return fmt.Errorf("上传失败: %w", err)
 			}

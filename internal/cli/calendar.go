@@ -77,7 +77,9 @@ func newCalendarCmd() *cobra.Command {
 			}
 
 			ctx := context.Background()
+			spinner := render.StartSpinner("正在创建学习事件...")
 			event, err := CalendarSvc.CreateStudyEvent(ctx, params)
+			spinner.Stop()
 			if err != nil {
 				return fmt.Errorf("创建学习事件失败: %w", err)
 			}
@@ -114,7 +116,9 @@ func newCalendarCmd() *cobra.Command {
 
 			ctx := context.Background()
 			maxDate := time.Now().AddDate(0, 0, days)
+			spinner := render.StartSpinner("正在获取学习事件列表...")
 			events, err := CalendarSvc.ListStudyEvents(ctx, subject, maxDate)
+			spinner.Stop()
 			if err != nil {
 				return fmt.Errorf("查询学习事件失败: %w", err)
 			}

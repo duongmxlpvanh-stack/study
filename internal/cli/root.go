@@ -29,7 +29,8 @@ var (
 	DiarySvc  *service.DiaryService
 
 	// Google 服务（nil = 未配置或初始化失败，功能降级可用）
-	DriveSvc *service.GoogleDriveService
+	DriveSvc    *service.GoogleDriveService
+	CalendarSvc *service.GoogleCalendarService
 
 	// 全局 rootCmd，REPL 复用
 	rootCmd *cobra.Command
@@ -69,6 +70,10 @@ func Init() {
 		DriveSvc, err = service.NewGoogleDriveService(cfg, googleClient)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "警告: Google Drive 服务初始化失败: %v\n", err)
+		}
+		CalendarSvc, err = service.NewGoogleCalendarService(cfg, googleClient)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "警告: Google Calendar 服务初始化失败: %v\n", err)
 		}
 	}
 
@@ -112,6 +117,7 @@ func buildRootCmd() *cobra.Command {
 	cmd.AddCommand(newInitCmd())
 	cmd.AddCommand(newGoogleAuthCmd())
 	cmd.AddCommand(newDriveCmd())
+	cmd.AddCommand(newCalendarCmd())
 
 	return cmd
 }
@@ -143,5 +149,8 @@ func Execute() {
 	}
 	if DriveSvc != nil {
 		DriveSvc.Close()
+	}
+	if CalendarSvc != nil {
+		CalendarSvc.Close()
 	}
 }

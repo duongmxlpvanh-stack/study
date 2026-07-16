@@ -89,6 +89,10 @@ func printREPLHelp() {
 	fmt.Println("  drive upload / dru      上传文件到 Drive")
 	fmt.Println("  drive list / drl        列出 Drive 文件")
 	fmt.Println("  drive status / drs      查看 Drive 状态")
+	fmt.Println("  calendar add / cala     创建学习事件")
+	fmt.Println("  calendar list / call    列出学习事件")
+	fmt.Println("  calendar status / cals  查看日历统计")
+	fmt.Println("  calendar clear          清除所有 AI 事件")
 	fmt.Println()
 }
 
@@ -118,6 +122,10 @@ func executeREPLCommand(input string) {
 		"dru": {"drive", "upload"},
 		"drl": {"drive", "list"},
 		"drs": {"drive", "status"},
+	"cal":  {"calendar"},
+	"cala": {"calendar", "add"},
+	"call": {"calendar", "list"},
+	"cals": {"calendar", "status"},
 	}
 
 	// 展开别名

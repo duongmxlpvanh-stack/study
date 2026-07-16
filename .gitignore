@@ -1,0 +1,15 @@
+# Go 构建产物
+study.exe
+*.exe
+*.test
+
+# 用户数据（本地）
+data/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

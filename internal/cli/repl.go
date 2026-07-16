@@ -86,6 +86,9 @@ func printREPLHelp() {
 	fmt.Println("  google login / gl       登录 Google 账号")
 	fmt.Println("  google logout / glo     退出 Google 账号")
 	fmt.Println("  google status / gst     查看认证状态")
+	fmt.Println("  drive upload / dru      上传文件到 Drive")
+	fmt.Println("  drive list / drl        列出 Drive 文件")
+	fmt.Println("  drive status / drs      查看 Drive 状态")
 	fmt.Println()
 }
 
@@ -111,6 +114,10 @@ func executeREPLCommand(input string) {
 		"gl":  {"google", "login"},
 		"glo": {"google", "logout"},
 		"gst": {"google", "status"},
+		"dr":  {"drive"},
+		"dru": {"drive", "upload"},
+		"drl": {"drive", "list"},
+		"drs": {"drive", "status"},
 	}
 
 	// 展开别名

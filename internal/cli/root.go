@@ -1,9 +1,11 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"os"
 
+	"study/internal/auth"
 	"study/internal/config"
 	"study/internal/render"
 	"study/internal/service"
@@ -25,6 +27,9 @@ var (
 	HeatSvc   *service.HeatmapService
 	StreakSvc *service.StreakService
 	DiarySvc  *service.DiaryService
+
+	// Google 服务（nil = 未配置或初始化失败，功能降级可用）
+	DriveSvc *service.GoogleDriveService
 
 	// 全局 rootCmd，REPL 复用
 	rootCmd *cobra.Command
@@ -55,6 +60,17 @@ func Init() {
 	HeatSvc = service.NewHeatmapService(cfg, RecordSvc)
 	StreakSvc = service.NewStreakService(cfg, RecordSvc)
 	DashSvc = service.NewDashboardService(cfg, ExamSvc, SubjSvc, WpSvc, RecordSvc, DiarySvc)
+
+	// 初始化 Google 服务（可选 — 未配置时静默跳过）
+	googleClient, err := auth.NewHTTPClient(context.Background(), config.GoogleScopes())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "警告: Google 服务初始化失败: %v\n", err)
+	} else if googleClient != nil {
+		DriveSvc, err = service.NewGoogleDriveService(cfg, googleClient)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "警告: Google Drive 服务初始化失败: %v\n", err)
+		}
+	}
 
 	// 构建命令树
 	rootCmd = buildRootCmd()
@@ -95,6 +111,7 @@ func buildRootCmd() *cobra.Command {
 	cmd.AddCommand(newStreakCmd())
 	cmd.AddCommand(newInitCmd())
 	cmd.AddCommand(newGoogleAuthCmd())
+	cmd.AddCommand(newDriveCmd())
 
 	return cmd
 }
@@ -123,5 +140,8 @@ func Execute() {
 	// 程序退出前关闭资源
 	if DiarySvc != nil {
 		DiarySvc.Close()
+	}
+	if DriveSvc != nil {
+		DriveSvc.Close()
 	}
 }

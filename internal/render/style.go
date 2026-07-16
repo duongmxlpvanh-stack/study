@@ -146,6 +146,14 @@ func StatCard(label, value string) string {
 		Render(card)
 }
 
+// SetTerminalTitle 设置终端窗口/标签页标题（ANSI OSC 0）
+func SetTerminalTitle(title string) {
+	if !useColor {
+		return
+	}
+	fmt.Printf("\033]0;%s\007", title)
+}
+
 // WarningBorder 警告边框（红色高亮）
 func WarningBorder(content string) string {
 	return lipgloss.NewStyle().

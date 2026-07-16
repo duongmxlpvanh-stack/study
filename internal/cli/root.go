@@ -140,6 +140,9 @@ func Execute() {
 	// Windows: 如果从资源管理器双击启动，自动在 Windows Terminal 中重新打开
 	ensureTerminal()
 
+	// 设置终端标签页标题
+	render.SetTerminalTitle("🕮 study")
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

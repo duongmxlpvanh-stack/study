@@ -11,6 +11,9 @@ import (
 
 // RunREPL 启动交互式命令行
 func RunREPL() {
+	// 进入 REPL 时刷新终端标签页标题
+	render.SetTerminalTitle("🕮 study")
+
 	fmt.Println(render.Title("📋 study 交互模式"))
 	fmt.Println(render.Dim("输入命令，输入 help 查看帮助，输入 exit 退出"))
 	fmt.Println()

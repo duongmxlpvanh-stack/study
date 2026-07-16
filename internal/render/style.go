@@ -68,13 +68,13 @@ func KeyValue(k, v string) string {
 	return Dim(k+": ") + v
 }
 
-// 热力图色块颜色（5级绿色渐变，使用 256 色调色板以获得最佳兼容性）
+// 热力图色块颜色（5级绿色渐变，TrueColor）
 var heatStyles = []lipgloss.Style{
-	lipgloss.NewStyle().Background(lipgloss.Color("235")), // 0: 深灰（无贡献）
-	lipgloss.NewStyle().Background(lipgloss.Color("22")),  // 1: 深绿
-	lipgloss.NewStyle().Background(lipgloss.Color("28")),  // 2: 中绿
-	lipgloss.NewStyle().Background(lipgloss.Color("34")),  // 3: 亮绿
-	lipgloss.NewStyle().Background(lipgloss.Color("40")),  // 4: 鲜绿
+	lipgloss.NewStyle().Background(lipgloss.Color("#1b1b1b")), // 0: 无
+	lipgloss.NewStyle().Background(lipgloss.Color("#0e4429")), // 1: 浅
+	lipgloss.NewStyle().Background(lipgloss.Color("#006d32")), // 2: 中浅
+	lipgloss.NewStyle().Background(lipgloss.Color("#26a641")), // 3: 中深
+	lipgloss.NewStyle().Background(lipgloss.Color("#39d353")), // 4: 深绿
 }
 
 // HeatBlock 热力图色块

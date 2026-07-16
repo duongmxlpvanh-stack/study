@@ -5,7 +5,15 @@ import (
 	"strings"
 
 	"study/internal/model"
+
+	"github.com/charmbracelet/lipgloss"
 )
+
+// 当前日期高亮边框
+var todayHighlight = lipgloss.NewStyle().
+	Border(lipgloss.NormalBorder()).
+	BorderForeground(lipgloss.Color("#58a6ff")).
+	BorderTop(false).BorderBottom(false).BorderLeft(false)
 
 // Heatmap 渲染 GitHub 风格的热力图
 func Heatmap(days []model.HeatMapDay) string {
@@ -13,27 +21,50 @@ func Heatmap(days []model.HeatMapDay) string {
 		return Dim("没有数据")
 	}
 
+	// 按周分组
+	weeks := groupByWeek(days)
+
 	var sb strings.Builder
 
-	// 按周分组（每周 7 天，周日起）
-	weeks := groupByWeek(days)
+	// 月份标签行
+	monthLabels := buildMonthLabels(weeks)
+	if len(monthLabels) > 0 {
+		sb.WriteString(renderMonthRow(monthLabels, len(weeks)))
+		sb.WriteString("\n")
+	}
 
 	// 星期标签
 	dayLabels := []string{"日", "一", "二", "三", "四", "五", "六"}
 
+	// 获取今天的日期用于高亮
+	todayStr := ""
+	if len(days) > 0 {
+		// 取 last entry date as approximation of today (latest data day)
+		todayStr = days[len(days)-1].Date
+	}
+
 	for row := 0; row < 7; row++ {
-		// 只在第 0, 2, 4, 6 行显示标签
 		label := "  "
 		if row%2 == 0 {
 			label = dayLabels[row] + " "
 		}
 		sb.WriteString(Dim(label))
 
-		for _, week := range weeks {
+		for col, week := range weeks {
 			if row < len(week) {
-				sb.WriteString(HeatBlock(week[row].Level))
+				day := week[row]
+				block := renderHeatCell(day.Level)
+				// 在最后一天（今天）加高亮
+				if day.Date == todayStr && day.Level > 0 {
+					block = todayHighlight.Render(strings.TrimRight(block, " "))
+				}
+				sb.WriteString(block)
 			} else {
-				sb.WriteString("  ") // 补齐
+				sb.WriteString("  ")
+			}
+			// 列间微间距
+			if col < len(weeks)-1 {
+				sb.WriteString(" ")
 			}
 		}
 		sb.WriteString("\n")
@@ -42,15 +73,88 @@ func Heatmap(days []model.HeatMapDay) string {
 	// 图例
 	sb.WriteString("\n")
 	sb.WriteString(Dim("  Less "))
-	sb.WriteString(HeatBlock(0))
-	sb.WriteString(HeatBlock(1))
-	sb.WriteString(HeatBlock(2))
-	sb.WriteString(HeatBlock(3))
-	sb.WriteString(HeatBlock(4))
-	sb.WriteString(Dim(" More"))
+	for i := 0; i <= 4; i++ {
+		sb.WriteString(renderHeatCell(i))
+		sb.WriteString(" ")
+	}
+	sb.WriteString(Dim("More"))
 	sb.WriteString("\n")
 
 	return sb.String()
+}
+
+// renderHeatCell 渲染单个热力图单元格
+func renderHeatCell(level int) string {
+	if level < 0 {
+		return "  "
+	}
+	if level > 4 {
+		level = 4
+	}
+	return heatStyles[level].Render("  ")
+}
+
+// monthLabel 月份标签（月份，列索引）
+type monthLabel struct {
+	month string
+	col   int
+}
+
+// buildMonthLabels 构建月份标签列表
+func buildMonthLabels(weeks [][]model.HeatMapDay) []monthLabel {
+	if len(weeks) == 0 {
+		return nil
+	}
+
+	var labels []monthLabel
+	lastMonth := ""
+	monthNames := []string{"", "1月", "2月", "3月", "4月", "5月", "6月",
+		"7月", "8月", "9月", "10月", "11月", "12月"}
+
+	for col, week := range weeks {
+		// 找该周第一个有效的日期
+		for _, day := range week {
+			if day.Level < 0 {
+				continue
+			}
+			// 解析月份
+			var y, m, d int
+			fmt.Sscanf(day.Date, "%d-%d-%d", &y, &m, &d)
+			monthName := monthNames[m]
+			if monthName != lastMonth {
+				labels = append(labels, monthLabel{month: monthName, col: col})
+				lastMonth = monthName
+			}
+			break
+		}
+	}
+
+	return labels
+}
+
+// renderMonthRow 渲染月份标签行
+func renderMonthRow(labels []monthLabel, totalCols int) string {
+	// 每个单元格宽度 = 2（色块） + 1（间距）
+	cellWidth := 3
+
+	// 构建一个字符数组表示月份行
+	row := make([]rune, totalCols*cellWidth+2) // +2 for left padding
+	for i := range row {
+		row[i] = ' '
+	}
+
+	for _, label := range labels {
+		pos := 2 + label.col*cellWidth  // 2 for left padding
+		runes := []rune(label.month)
+		for i, r := range runes {
+			idx := pos + i
+			if idx < len(row) {
+				row[idx] = r
+			}
+		}
+	}
+
+	return Dim(string(row))
 }
 
 // groupByWeek 将日期按周分组
@@ -95,8 +199,6 @@ func groupByWeek(days []model.HeatMapDay) [][]model.HeatMapDay {
 
 // weekdayOf 返回日期是星期几 (0=周日, 1=周一, ...)
 func weekdayOf(dateStr string) int {
-	// dateStr 格式 2006-01-02
-	// 简化：解析 YYYY-MM-DD 计算星期
 	var y, m, d int
 	fmt.Sscanf(dateStr, "%d-%d-%d", &y, &m, &d)
 

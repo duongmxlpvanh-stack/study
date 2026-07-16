@@ -8,6 +8,7 @@ import (
 	"study/internal/render"
 	"study/internal/service"
 
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 )
 
@@ -72,6 +73,11 @@ func buildRootCmd() *cobra.Command {
 设计哲学：把精力留给学习本身，管理交给工具。`,
 		// 无子命令时默认进入 REPL 或显示帮助
 		Run: func(cmd *cobra.Command, args []string) {
+			// 非交互终端（管道/重定向）：显示帮助后退出，避免卡在 REPL
+			if !isatty.IsTerminal(os.Stdin.Fd()) && !isatty.IsCygwinTerminal(os.Stdin.Fd()) {
+				cmd.Help()
+				return
+			}
 			// 进入 REPL 交互模式
 			RunREPL()
 		},
@@ -105,6 +111,10 @@ func GetConfig() *config.Config {
 // Execute 运行根命令
 func Execute() {
 	Init()
+
+	// Windows: 如果从资源管理器双击启动，自动在 Windows Terminal 中重新打开
+	ensureTerminal()
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/mattn/go-isatty"
 )
 
 // 简单的 ANSI 颜色和样式
@@ -12,8 +14,12 @@ import (
 var useColor = true
 
 func init() {
-	// 检测是否支持颜色（非 Windows cmd 可能不支持）
+	// 检测是否支持颜色
 	if os.Getenv("NO_COLOR") != "" || os.Getenv("TERM") == "dumb" {
+		useColor = false
+	}
+	// stdout 不是终端时（管道/重定向）禁用颜色
+	if !isatty.IsTerminal(os.Stdout.Fd()) && !isatty.IsCygwinTerminal(os.Stdout.Fd()) {
 		useColor = false
 	}
 }

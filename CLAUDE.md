@@ -143,6 +143,8 @@ study/
 
 ## Git 工作流
 
+**远程仓库**: `https://github.com/duongmxlpvanh-stack/study.git`（已关联 `origin`）
+
 **规则：每次代码更改后必须提交**，做好版本管理，保持提交历史清晰可追溯。
 
 ```bash

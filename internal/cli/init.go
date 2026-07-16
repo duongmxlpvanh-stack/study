@@ -34,7 +34,7 @@ func newInitCmd() *cobra.Command {
 func runInitWizard() error {
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Println(render.Title("🚀 欢迎使用 study 管理中心！"))
+	render.Typewriter(render.Title("🚀 欢迎使用 study 管理中心！"), 25*time.Millisecond)
 	fmt.Println()
 	fmt.Println(render.Dim("这将是一个简短的设置向导，帮你快速上手。"))
 	fmt.Println(render.Dim("你可以随时按 Ctrl+C 退出，之后用 study init 重新开始。"))

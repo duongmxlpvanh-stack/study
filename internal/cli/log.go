@@ -45,14 +45,16 @@ func newLogCmd() *cobra.Command {
 				return nil
 			}
 			fmt.Println(render.Section("📝 最近学习记录"))
+			t := render.NewTable("日期", "科目", "内容")
 			for i := len(records) - 1; i >= 0; i-- {
 				r := records[i]
-				fmt.Printf("  %s  %s  %s\n",
+				t.AddRow(
 					render.Dim(r.Date),
 					render.Cyan(r.Subject),
 					r.Content,
 				)
 			}
+			fmt.Print(t.Render())
 			return nil
 		},
 	})

@@ -55,18 +55,20 @@ func newDiaryCmd() *cobra.Command {
 				return nil
 			}
 			fmt.Println(render.Section("📖 最近日记"))
+			t := render.NewTable("日期", "字数", "预览")
 			for _, d := range diaries {
 				preview := d.Content
 				runes := []rune(d.Content)
 				if len(runes) > 60 {
 					preview = string(runes[:60]) + "…"
 				}
-				fmt.Printf("  %s  %s字  %s\n",
+				t.AddRow(
 					render.Dim(d.Date),
 					render.Dim(fmt.Sprint(d.WordCount)),
 					preview,
 				)
 			}
+			fmt.Print(t.Render())
 			return nil
 		},
 	})

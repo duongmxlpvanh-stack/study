@@ -47,6 +47,7 @@ func newExamCmd() *cobra.Command {
 				return nil
 			}
 			fmt.Println(render.Section("⏰ 考试倒计时"))
+			t := render.NewTable("序号", "考试名称", "考试日期", "剩余天数", "状态")
 			for i, e := range exams {
 				urgencyColor := render.Green
 				switch {
@@ -57,12 +58,15 @@ func newExamCmd() *cobra.Command {
 				case e.DaysLeft <= 30:
 					urgencyColor = render.Yellow
 				}
-				fmt.Printf("  %d. %s  %s  剩余 %s 天  %s\n",
-					i+1, e.Name, render.Dim(e.Date),
-					render.Bold(strconv.Itoa(e.DaysLeft)),
+				t.AddRow(
+					strconv.Itoa(i+1),
+					e.Name,
+					render.Dim(e.Date),
+					render.Bold(strconv.Itoa(e.DaysLeft))+" 天",
 					urgencyColor(e.UrgencyStr),
 				)
 			}
+			fmt.Print(t.Render())
 			return nil
 		},
 	})

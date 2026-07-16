@@ -47,7 +47,7 @@
 
 ### 下载使用
 
-从 [Releases](https://github.com/duongmxlpvanh-stack/study/releases) 下载 `study.exe`（约 11MB），放入任意目录即可运行。
+从 [Releases](https://github.com/duongmxlpvanh-stack/study/releases) 下载 `study.exe`（约 31MB），放入任意目录即可运行。
 
 ### 从源码编译
 

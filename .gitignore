@@ -3,6 +3,10 @@ study.exe
 *.exe
 *.test
 
+# 图标资源（原始 PNG，仅用于生成 .syso）
+icons8-保存图书-*.png
+icon.ico
+
 # 用户数据（本地）
 data/
 

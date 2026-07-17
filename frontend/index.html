@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕮 study管理中心</title>
+    <link rel="stylesheet" href="src/style.css">
+    <!-- 骨架屏内联样式：确保窗口打开即刻有视觉反馈 -->
+    <style>
+        /* 首帧立即渲染，无需等待外部 CSS */
+        body { margin: 0; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f5f5f5; }
+        .skeleton { animation: shimmer 1.5s infinite; background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%); background-size: 200% 100%; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    </style>
+</head>
+<body>
+    <!-- 骨架屏（数据加载前显示） -->
+    <div id="skeleton">
+        <div class="skeleton" style="height:48px; margin:16px; border-radius:8px; width:200px"></div>
+        <div style="display:flex; gap:12px; padding:16px">
+            <div class="skeleton" style="flex:1; height:80px; border-radius:10px"></div>
+            <div class="skeleton" style="flex:1; height:80px; border-radius:10px"></div>
+            <div class="skeleton" style="flex:1; height:80px; border-radius:10px"></div>
+            <div class="skeleton" style="flex:1; height:80px; border-radius:10px"></div>
+        </div>
+        <div class="skeleton" style="height:120px; margin:16px; border-radius:10px"></div>
+        <div class="skeleton" style="height:200px; margin:16px; border-radius:10px"></div>
+    </div>
+
+    <!-- 主应用（初始隐藏） -->
+    <div id="app" style="display:none">
+        <nav id="sidebar">
+            <div class="logo">🕮 study</div>
+            <ul class="nav-items">
+                <li class="nav-item active" data-page="dashboard">📊 仪表板</li>
+                <li class="nav-item" data-page="exams">⏰ 考试</li>
+                <li class="nav-item" data-page="weakpoints">🎯 薄弱点</li>
+                <li class="nav-item" data-page="subjects">📚 科目</li>
+                <li class="nav-item" data-page="records">📝 记录</li>
+                <li class="nav-item" data-page="diary">📖 日记</li>
+                <li class="nav-item" data-page="memos">📋 备忘</li>
+            </ul>
+            <div class="sidebar-footer">
+                <span id="sync-status" title="云端同步状态">⚪ 同步</span>
+            </div>
+        </nav>
+        <main id="content">
+            <!-- 页面内容由 JS 动态渲染 -->
+        </main>
+    </div>
+
+    <script src="src/app.js"></script>
+    <script src="src/pages/dashboard.js"></script>
+</body>
+</html>

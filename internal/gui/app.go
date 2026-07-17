@@ -2,6 +2,7 @@ package gui
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"runtime"
@@ -22,7 +23,8 @@ type App struct {
 }
 
 // NewApp 创建 GUI 应用实例
-func NewApp(svc *service.AllServices) *App {
+// assetsHandler: 前端静态资源 HTTP 处理器（nil 表示无前端资源）
+func NewApp(svc *service.AllServices, assetsHandler http.Handler) *App {
 	handler := NewHandler(svc)
 
 	opts := application.Options{
@@ -30,6 +32,9 @@ func NewApp(svc *service.AllServices) *App {
 		Description: "个人学习管理工具 — Dashboard 看清全局，敲命令完成记录",
 		Services: []application.Service{
 			application.NewService(handler),
+		},
+		Assets: application.AssetOptions{
+			Handler: assetsHandler,
 		},
 		Windows: application.WindowsOptions{
 			DisableQuitOnLastWindowClosed: true,

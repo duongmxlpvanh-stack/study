@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -25,17 +26,47 @@ func main() {
 	}
 	defer svc.Close()
 
-	// 3. 创建 Wails 应用（前端开发时由 wails3 dev 处理）
-	app := gui.NewApp(svc)
-
-	// 4. 设置日志
+	// 3. 设置日志
 	setupLogging(cfg.DataDir)
 
-	// 5. 启动 GUI（阻塞直到退出）
+	// 4. 定位前端资源目录
+	frontendDir := findFrontendDir()
+	log.Printf("[GUI] 前端目录: %s", frontendDir)
+
+	// 5. 创建前端资源 HTTP 处理器
+	assetsHandler := http.FileServer(http.Dir(frontendDir))
+
+	// 6. 创建 Wails 应用
+	app := gui.NewApp(svc, assetsHandler)
+
+	// 7. 启动 GUI（阻塞直到退出）
 	if err := app.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "GUI 启动失败: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+// findFrontendDir 查找前端资源目录
+// 优先级: 1) 可执行文件同级的 frontend/  2) 当前工作目录的 frontend/
+func findFrontendDir() string {
+	// 1. 可执行文件所在目录
+	if exePath, err := os.Executable(); err == nil {
+		dir := filepath.Join(filepath.Dir(exePath), "frontend")
+		if info, err := os.Stat(dir); err == nil && info.IsDir() {
+			return dir
+		}
+	}
+
+	// 2. 当前工作目录
+	if cwd, err := os.Getwd(); err == nil {
+		dir := filepath.Join(cwd, "frontend")
+		if info, err := os.Stat(dir); err == nil && info.IsDir() {
+			return dir
+		}
+	}
+
+	// 3. 降级：返回当前目录下的 frontend
+	return "frontend"
 }
 
 // setupLogging 将日志输出到数据目录

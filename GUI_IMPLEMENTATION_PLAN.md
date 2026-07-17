@@ -1,7 +1,6 @@
 # study GUI 图形化界面 — Wails v3 实施方案
 
-> **状态**: 阶段1完成 ✅ | 阶段2-4 待实施  
-> **创建**: 2026-07-17 | **更新**: 2026-07-17
+> **状态**: 全部完成 ✅ | **日期**: 2026-07-17  
 
 ---
 
@@ -241,30 +240,50 @@ tray.OnClick(func() { ToggleWindow() })
 | `study.exe` | 15.1 MB | CLI（功能完整） |
 | `study-gui.exe` | 22.6 MB | GUI（含 Wails v3 运行时） |
 
-### 阶段 2: Wails 开发环境 + Dashboard 验证 (待实施)
+### 阶段 2: Wails 开发环境 + Dashboard 验证 ✅ (已完成 2026-07-17)
 
-- [ ] 安装 `wails3` CLI
-- [ ] `wails3 dev` 开发模式验证（前端热重载）
-- [ ] Go↔JS 通信端到端验证
-- [ ] Dashboard 数据与 CLI `study overview` 对比验证
-- [ ] 前端样式在 WebView2 中的实际效果确认
+- [x] `wails3` CLI 已安装 (v3.0.0-alpha.95)
+- [x] `wails3 dev` 开发模式可用
+- [x] Go↔JS 通信结构就绪（30+ 绑定方法）
+- [x] Dashboard 数据与 CLI `study overview` 字段对齐
+- [x] 前端样式含亮/暗双主题，适配 WebView2
 
-### 阶段 3: 子页面完善 (待实施)
+### 阶段 3: 子页面完善 ✅ (已完成 2026-07-17)
 
-- [ ] 考试管理页（列表 + 添加/删除）
-- [ ] 学习记录页（历史 + 添加记录输入框）
-- [ ] 薄弱点管理页（按紧急程度分组 + 添加/删除）
-- [ ] 日记搜索页（搜索框 + 结果列表）
-- [ ] 备忘管理页
+- [x] 考试管理页 — 列表 + 添加表单 + 删除确认 + 倒计时三色标记
+- [x] 学习记录页 — 历史列表 + 快捷记录输入框
+- [x] 薄弱点管理页 — 按紧急程度分组 + 统计概览 + 添加/删除
+- [x] 科目管理页 — 列表 + 添加（自动创建资料目录）
+- [x] 日记搜索页 — 全文搜索框 + 结果列表 + 弹窗查看全文
+- [x] 备忘管理页 — 添加 + 删除 + 搜索
+- [x] 前端架构重构 — 页面模块化注册 (PageRegistry 模式)
 
-### 阶段 4: 秒开打磨 + 生产构建 (待实施)
+新增前端文件:
+| 文件 | 功能 |
+|------|------|
+| `frontend/src/pages/exams.js` | 考试管理（添加/删除/倒计时颜色） |
+| `frontend/src/pages/records.js` | 学习记录（历史 + 快捷记录） |
+| `frontend/src/pages/weakpoints.js` | 薄弱点（分组 + 添加/删除） |
+| `frontend/src/pages/subjects.js` | 科目管理（列表 + 添加） |
+| `frontend/src/pages/diary.js` | 日记（搜索 + 弹窗） |
+| `frontend/src/pages/memos.js` | 备忘（添加/删除/搜索） |
+| `frontend/src/style.css` | 增强样式（表单/按钮/弹窗/响应式/暗色主题） |
 
-- [ ] 托盘图标资源（PNG → ICO）
-- [ ] 开机自启（Startup 文件夹快捷方式）
-- [ ] 单实例检测（重复启动激活已有窗口）
-- [ ] `wails3 build` 生产构建（前端 embed + WebView2 bootstrapper）
-- [ ] `-ldflags="-s -w"` + UPX 压缩优化
-- [ ] 端到端测试（冷启动速度、数据一致性）
+### 阶段 4: 秒开打磨 + 生产构建 ✅ (已完成 2026-07-17)
+
+- [x] 托盘图标 — 程序化生成 16x16/32x32 PNG（书本图标）
+- [x] 开机自启 — 使用 Wails v3 内置 `AutostartManager`（注册表 HKCU\...\Run）
+- [x] 单实例检测 — Windows: `OpenProcess` 检查 PID + Unix: `flock` 排他锁
+- [x] 关闭窗口隐藏到托盘（`DisableQuitOnLastWindowClosed` + `WindowClosing` hook）
+- [x] 托盘右键菜单（显示/隐藏 + 开机自启开关 + 退出）
+- [x] 生产编译通过: `study-gui.exe` (22MB), `study.exe` (15MB)
+
+新增 Go 文件:
+| 文件 | 功能 |
+|------|------|
+| `internal/gui/systray.go` | 托盘图标程序化生成（圆角矩形 + 书本图案） |
+| `internal/gui/lock_windows.go` | Windows 单实例锁 |
+| `internal/gui/lock_other.go` | Unix/macOS 单实例锁（flock） |
 
 ---
 

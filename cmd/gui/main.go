@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"study/internal/config"
 	"study/internal/gui"
@@ -26,16 +25,13 @@ func main() {
 	}
 	defer svc.Close()
 
-	// 3. 创建前端资源（开发时为空，生产构建时 embed）
-	var assets gui.FrontendAssets = gui.NoAssets{}
+	// 3. 创建 Wails 应用（前端开发时由 wails3 dev 处理）
+	app := gui.NewApp(svc)
 
-	// 4. 创建 Wails 应用
-	app := gui.NewApp(svc, assets)
-
-	// 5. 设置日志文件
+	// 4. 设置日志
 	setupLogging(cfg.DataDir)
 
-	// 6. 启动 GUI（阻塞直到退出）
+	// 5. 启动 GUI（阻塞直到退出）
 	if err := app.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "GUI 启动失败: %v\n", err)
 		os.Exit(1)
@@ -46,10 +42,6 @@ func main() {
 func setupLogging(dataDir string) {
 	logPath := filepath.Join(dataDir, "gui.log")
 	_ = logPath
-	// 日志默认输出到 stderr，后续可改为文件
 	log.SetPrefix("[study-gui] ")
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 }
-
-// 确保未使用的导入不出错
-var _ = strings.TrimSpace

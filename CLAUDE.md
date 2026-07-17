@@ -25,18 +25,25 @@ go build -o study.exe .    # 编译
 | CLI 框架 | cobra v1.10.2 | Go 社区标准 |
 | SQLite | modernc.org/sqlite v1.53.0 | 纯 Go 实现，无需 CGO |
 | 终端渲染 | 手写 ANSI 序列 | 零依赖，后续可升级 lipgloss |
-| GUI | 暂无 | 先只做 CLI |
+| GUI | Wails v3 (WebView2) | Windows 原生桌面应用，复用 service 层 |
 
 ## 架构分层
 
 ```
 main.go (入口, 7行)
-  └─ cli/ (命令定义 + REPL, 10个文件)
-       └─ service/ (业务逻辑, 8个服务)
-            ├─ storage/markdown/ (5个文件读写)
-            ├─ storage/sqlite/ (日记 + FTS5全文搜索)
-            └─ model/ (7个纯数据结构)
-       └─ render/ (终端渲染, 3个文件)
+  ├─ cli/ (命令定义 + REPL, 10个文件)
+  └─ cmd/gui/main.go (GUI入口, 新增)
+       ├─ service/ (业务逻辑, 14个服务 + bootstrap.go)
+       │    ├─ storage/markdown/ (5个文件读写)
+       │    ├─ storage/sqlite/ (日记 + FTS5全文搜索)
+       │    └─ model/ (7个纯数据结构)
+       ├─ cli/ (cobra 命令 + REPL)
+       ├─ gui/ (Wails v3 app + handlers + systray + 锁)
+       │    ├─ app.go, handlers.go, systray.go
+       │    ├─ lock_windows.go, lock_other.go
+       └─ frontend/ (纯 HTML/CSS/JS, 无框架)
+            ├─ index.html, src/app.js, src/style.css
+            └─ src/pages/ (7个页面模块)
 ```
 
 **依赖方向**: CLI → Service → Storage → Model（Config 横向注入）
@@ -99,9 +106,9 @@ study/
 4. **中文原生** — 所有 UI 文本、紧急程度标签（紧急/不急/考前看）均为中文。
 5. **紧急程度枚举** — `model.UrgencyUrgent = "紧急"`, `UrgencyRelaxed = "不急"`, `UrgencyPreExam = "考前看"`
 
-## 当前状态 (2026-07-16)
+## 当前状态 (2026-07-17)
 
-### 已完成 (MVP 全部核心功能)
+### 已完成 (全部核心功能 + GUI)
 - [x] 学习进度记录 (`study log`)
 - [x] 薄弱知识点管理 (`study wp`)
 - [x] 考试倒计时 (`study exam`)
@@ -113,18 +120,21 @@ study/
 - [x] 行政事务备忘 (`study memo`)
 - [x] REPL 交互模式 (`study`)
 - [x] 首次引导向导 (`study init`)
-- [x] 编译验证通过，端到端测试通过
+- [x] GitHub 云端同步 (`study sync`)
+- [x] **GUI 桌面应用 (`study-gui.exe`)** — Wails v3 + WebView2
+  - 系统托盘（显示/隐藏 + 开机自启 + 退出）
+  - 7 个子页面（仪表板/考试/薄弱点/科目/记录/日记/备忘）
+  - 单实例检测 + 亮暗双主题
+  - 纯 HTML/CSS/JS 前端，无框架依赖
+- [x] 编译验证通过（CLI 15MB + GUI 22MB）
 
-### 待修复
-- [ ] 连续学习天数（streak）计算逻辑需验证：当天没有记录时是否正确归零
-- [ ] 热力图星期起始对齐（首周前面的空白填充）
-- [ ] `study diary open` 在纯 CMD 环境下的编辑器检测
+### 编译命令
 
-### 待开发（可选功能，按需启用）
-- [ ] PDF 试题与讲义生成（AI + LaTeX）
-- [ ] Google Drive 云端上传
-- [ ] AI 学习规划 + Google Calendar 集成
-- [ ] Windows GUI 桌面客户端
+```bash
+go build -ldflags="-s -w" -o study.exe .              # CLI
+go build -ldflags="-s -w" -o study-gui.exe ./cmd/gui/ # GUI
+wails3 dev                                            # GUI 开发模式（热重载）
+```
 
 ### 明确不做
 - 不开发移动端

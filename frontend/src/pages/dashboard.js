@@ -3,8 +3,7 @@
  *
  * 依赖 app.js 中的 GoAPI 和 AppState
  */
-
-async function renderDashboard(container) {
+registerPage('dashboard', async function(container) {
     // 先用缓存数据立即渲染，避免闪烁
     if (AppState.dashboard) {
         paintDashboard(container, AppState.dashboard);
@@ -24,7 +23,7 @@ async function renderDashboard(container) {
             }
         }
     }
-}
+});
 
 function paintDashboard(container, d) {
     if (!d) {
@@ -55,10 +54,10 @@ function paintDashboard(container, d) {
             else if (e.DaysLeft <= 7) cls = 'urgent';
             else if (e.DaysLeft <= 30) cls = 'warn';
             html += `<div class="list-item">
-                <span>${e.Name}</span>
+                <span>${escapeHtml(e.Name)}</span>
                 <span class="dim">${e.Date}</span>
                 <span>剩余 <strong class="${cls}">${e.DaysLeft}</strong> 天</span>
-                <span>${e.UrgencyStr}</span>
+                <span>${e.UrgencyStr || ''}</span>
             </div>`;
         });
     }
@@ -88,8 +87,8 @@ function paintDashboard(container, d) {
     } else {
         subjects.forEach(s => {
             html += `<div class="list-item">
-                <span>${s.Name}</span>
-                <span class="dim">${s.MaterialCount} 份资料</span>
+                <span>${escapeHtml(s.Name)}</span>
+                <span class="dim">${s.MaterialCount || 0} 份资料</span>
             </div>`;
         });
     }
@@ -104,8 +103,8 @@ function paintDashboard(container, d) {
         records.forEach(r => {
             html += `<div class="list-item">
                 <span class="dim">${r.Date}</span>
-                <span class="subject">${r.Subject}</span>
-                <span>${r.Content}</span>
+                <span class="subject">${escapeHtml(r.Subject || '')}</span>
+                <span>${escapeHtml(r.Content || '')}</span>
             </div>`;
         });
     }
@@ -121,8 +120,8 @@ function paintDashboard(container, d) {
             const preview = (d.Content || '').substring(0, 80);
             html += `<div class="list-item">
                 <span class="dim">${d.Date}</span>
-                <span class="dim">${d.WordCount}字</span>
-                <span>${preview}${d.Content && d.Content.length > 80 ? '...' : ''}</span>
+                <span class="dim">${d.WordCount || 0}字</span>
+                <span>${escapeHtml(preview)}${d.Content && d.Content.length > 80 ? '...' : ''}</span>
             </div>`;
         });
     }

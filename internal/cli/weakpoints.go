@@ -39,6 +39,7 @@ func newWeakPointCmd() *cobra.Command {
 			if err := WpSvc.Add(content, urgency, subject); err != nil {
 				return err
 			}
+			InvalidateCache("weakpoints")
 			afterWrite("添加薄弱点: %s", content)
 			fmt.Printf(render.Green("✅ 已添加薄弱点: %s [%s]\n"), content, urgency)
 			return nil
@@ -54,10 +55,18 @@ func newWeakPointCmd() *cobra.Command {
 		Aliases: []string{"ls"},
 		Short:   "列出薄弱知识点（按紧急程度排列）",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			wps, err := WpSvc.List()
-			if err != nil {
-				return err
+			// 尝试从缓存读取
+			wps, _ := cacheGet("weakpoints").([]model.WeakPoint)
+
+			var err error
+			if wps == nil {
+				wps, err = WpSvc.List()
+				if err != nil {
+					return err
+				}
+				cacheSet("weakpoints", wps)
 			}
+
 			if len(wps) == 0 {
 				fmt.Println(render.Dim("暂无薄弱知识点，使用 study wp add 添加"))
 				return nil
@@ -116,6 +125,7 @@ func newWeakPointCmd() *cobra.Command {
 			if err := WpSvc.Delete(idx); err != nil {
 				return err
 			}
+			InvalidateCache("weakpoints")
 			afterWrite("删除薄弱点")
 			fmt.Println(render.Green("✅ 已删除薄弱点"))
 			return nil

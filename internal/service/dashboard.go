@@ -35,36 +35,89 @@ func NewDashboardService(
 	}
 }
 
-// Overview 聚合生成 Dashboard 数据
+// Overview 聚合生成 Dashboard 数据（并发收集各数据源）
 func (s *DashboardService) Overview() (*model.Dashboard, error) {
 	d := &model.Dashboard{}
 
-	// 考试倒计时
-	exams, err := s.examService.List()
-	if err != nil {
-		return nil, err
+	// 为每项数据定义 result struct
+	type examResult struct {
+		exams []model.ExamWithCountdown
+		err   error
 	}
-	d.Exams = exams
+	type subjResult struct {
+		subjects []model.SubjectWithCount
+		err      error
+	}
+	type wpResult struct {
+		stats model.WeakPointStats
+		err   error
+	}
+	type recResult struct {
+		records []model.Record
+		err     error
+	}
+	type diaryResult struct {
+		diaries []model.Diary
+		err     error
+	}
 
-	// 科目及资料数
-	subjects, err := s.subjService.ListWithMaterialCount()
-	if err != nil {
-		return nil, err
-	}
-	d.Subjects = subjects
+	// 创建带缓冲的 channel
+	examCh := make(chan examResult, 1)
+	subjCh := make(chan subjResult, 1)
+	wpCh := make(chan wpResult, 1)
+	recCh := make(chan recResult, 1)
+	diaryCh := make(chan diaryResult, 1)
 
-	// 薄弱点统计
-	wpStats, err := s.wpService.Stats()
-	if err != nil {
-		return nil, err
-	}
-	d.WeakPointStats = wpStats
+	// 并发启动 5 个 goroutine
+	go func() {
+		exams, err := s.examService.List()
+		examCh <- examResult{exams, err}
+	}()
+	go func() {
+		subjects, err := s.subjService.ListWithMaterialCount()
+		subjCh <- subjResult{subjects, err}
+	}()
+	go func() {
+		stats, err := s.wpService.Stats()
+		wpCh <- wpResult{stats, err}
+	}()
+	go func() {
+		records, err := s.recordService.GetAllRecords()
+		recCh <- recResult{records, err}
+	}()
+	go func() {
+		if s.diaryService != nil {
+			diaries, err := s.diaryService.ListRecent(5)
+			diaryCh <- diaryResult{diaries, err}
+		} else {
+			diaryCh <- diaryResult{nil, nil}
+		}
+	}()
 
-	// 学习统计
-	records, err := s.recordService.GetAllRecords()
-	if err != nil {
-		return nil, err
+	// 收集结果（任意子查询失败则整体返回错误）
+	r := <-examCh
+	if r.err != nil {
+		return nil, r.err
 	}
+	d.Exams = r.exams
+
+	r2 := <-subjCh
+	if r2.err != nil {
+		return nil, r2.err
+	}
+	d.Subjects = r2.subjects
+
+	r3 := <-wpCh
+	if r3.err != nil {
+		return nil, r3.err
+	}
+	d.WeakPointStats = r3.stats
+
+	r4 := <-recCh
+	if r4.err != nil {
+		return nil, r4.err
+	}
+	records := r4.records
 	d.StudyStats = computeStudyStats(records)
 
 	// 最近记录（取最后 5 条，倒序）
@@ -78,14 +131,12 @@ func (s *DashboardService) Overview() (*model.Dashboard, error) {
 	}
 	d.RecentRecords = recentRecords
 
-	// 最近日记（diaryService 可能为 nil，如果数据库初始化失败）
-	if s.diaryService != nil {
-		diaries, err := s.diaryService.ListRecent(5)
-		if err != nil {
-			return nil, err
-		}
-		d.RecentDiaries = diaries
+	// 最近日记
+	r5 := <-diaryCh
+	if r5.err != nil {
+		return nil, r5.err
 	}
+	d.RecentDiaries = r5.diaries
 
 	return d, nil
 }

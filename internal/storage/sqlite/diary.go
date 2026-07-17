@@ -8,7 +8,7 @@ import (
 
 	"study/internal/model"
 
-	_ "modernc.org/sqlite"
+	_ "github.com/ncruces/go-sqlite3/driver"
 )
 
 // DiaryStore 日记的 SQLite 存储
@@ -18,7 +18,7 @@ type DiaryStore struct {
 
 // New 创建或打开日记数据库
 func New(dbPath string) (*DiaryStore, error) {
-	db, err := sql.Open("sqlite", dbPath)
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return nil, fmt.Errorf("打开数据库失败: %w", err)
 	}

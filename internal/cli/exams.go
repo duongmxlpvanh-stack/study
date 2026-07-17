@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"study/internal/model"
 	"study/internal/render"
 
 	"github.com/spf13/cobra"
@@ -28,6 +29,7 @@ func newExamCmd() *cobra.Command {
 			if err := ExamSvc.Add(name, date); err != nil {
 				return err
 			}
+			InvalidateCache("exams")
 			afterWrite("添加考试: %s (%s)", name, date)
 			fmt.Printf(render.Green("✅ 已添加考试: %s (%s)\n"), name, date)
 			return nil
@@ -39,10 +41,18 @@ func newExamCmd() *cobra.Command {
 		Aliases: []string{"ls"},
 		Short:   "列出所有考试倒计时",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			exams, err := ExamSvc.List()
-			if err != nil {
-				return err
+			// 尝试从缓存读取
+			exams, _ := cacheGet("exams").([]model.ExamWithCountdown)
+
+			var err error
+			if exams == nil {
+				exams, err = ExamSvc.List()
+				if err != nil {
+					return err
+				}
+				cacheSet("exams", exams)
 			}
+
 			if len(exams) == 0 {
 				fmt.Println(render.Dim("暂无考试，使用 study exam add 添加"))
 				return nil
@@ -85,6 +95,7 @@ func newExamCmd() *cobra.Command {
 			if err := ExamSvc.Delete(idx); err != nil {
 				return err
 			}
+			InvalidateCache("exams")
 			afterWrite("删除考试")
 			fmt.Println(render.Green("✅ 已删除考试"))
 			return nil

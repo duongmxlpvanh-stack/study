@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"runtime"
 
+	"study/internal/model"
 	"study/internal/render"
 
 	"github.com/spf13/cobra"
@@ -28,6 +29,7 @@ func newSubjectCmd() *cobra.Command {
 			if err := SubjSvc.Add(name); err != nil {
 				return err
 			}
+			InvalidateCache("subjects")
 			afterWrite("添加科目: %s", name)
 			fmt.Printf(render.Green("✅ 已添加科目: %s（资料文件夹已创建）\n"), name)
 			return nil
@@ -39,10 +41,18 @@ func newSubjectCmd() *cobra.Command {
 		Aliases: []string{"ls"},
 		Short:   "列出所有科目",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			subjects, err := SubjSvc.ListWithMaterialCount()
-			if err != nil {
-				return err
+			// 尝试从缓存读取
+			subjects, _ := cacheGet("subjects").([]model.SubjectWithCount)
+
+			var err error
+			if subjects == nil {
+				subjects, err = SubjSvc.ListWithMaterialCount()
+				if err != nil {
+					return err
+				}
+				cacheSet("subjects", subjects)
 			}
+
 			if len(subjects) == 0 {
 				fmt.Println(render.Dim("暂无科目，使用 study subj add 添加"))
 				return nil

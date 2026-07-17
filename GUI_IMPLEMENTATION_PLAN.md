@@ -297,7 +297,7 @@ go build -ldflags="-s -w" -o study.exe .
 wails3 dev
 
 # GUI 构建（生产模式）
-wails3 build -ldflags="-s -w" -o study-gui.exe
+wails3 build -ldflags="-H windowsgui -s -w" -o study-gui.exe
 ```
 
 ---

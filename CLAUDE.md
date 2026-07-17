@@ -132,7 +132,7 @@ study/
 
 ```bash
 go build -ldflags="-s -w" -o study.exe .              # CLI
-go build -ldflags="-s -w" -o study-gui.exe ./cmd/gui/ # GUI
+go build -ldflags="-H windowsgui -s -w" -o study-gui.exe ./cmd/gui/ # GUI（无终端窗口）
 wails3 dev                                            # GUI 开发模式（热重载）
 ```
 

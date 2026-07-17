@@ -151,10 +151,11 @@ func GetConfig() *config.Config {
 
 // Execute 运行根命令
 func Execute() {
-	Init()
-
 	// Windows: 如果从资源管理器双击启动，自动在 Windows Terminal 中重新打开
+	// 必须在 Init() 之前调用，最小化 cmd.exe 黑窗口的可见时间
 	ensureTerminal()
+
+	Init()
 
 	// 设置终端标签页标题
 	render.SetTerminalTitle("🕮 study")

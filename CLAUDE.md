@@ -55,6 +55,8 @@ study/
 ├── main.go              # 入口：cli.Init() → cli.Execute()
 ├── go.mod
 ├── study.exe            # 编译产物（不提交 Git）
+├── study-gui.exe        # GUI 编译产物（不提交 Git）
+├── 启动study.exe         # 启动器 — 双击无闪窗打开 Windows Terminal（不提交 Git）
 ├── CLAUDE.md            # 本文件
 ├── PROJECT_FEATURES_AND_PHILOSOPHY.md  # 需求规格文档
 └── internal/
@@ -131,8 +133,9 @@ study/
 ### 编译命令
 
 ```bash
-go build -ldflags="-s -w" -o study.exe .              # CLI
-go build -ldflags="-H windowsgui -s -w" -o study-gui.exe ./cmd/gui/ # GUI（无终端窗口）
+go build -ldflags="-s -w" -o study.exe .                          # CLI
+go build -ldflags="-H windowsgui -s -w" -o study-gui.exe ./cmd/gui/      # GUI（无终端窗口）
+go build -ldflags="-H windowsgui -s -w" -o 启动study.exe ./cmd/launcher/  # 启动器（零闪窗）
 wails3 dev                                            # GUI 开发模式（热重载）
 ```
 

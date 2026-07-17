@@ -26,6 +26,7 @@ func newLogCmd() *cobra.Command {
 			if err := RecordSvc.Log(input); err != nil {
 				return err
 			}
+			afterWrite("更新学习记录")
 			fmt.Println(render.Green("✅ 已记录学习进度"))
 			return nil
 		},

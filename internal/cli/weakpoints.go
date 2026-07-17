@@ -39,6 +39,7 @@ func newWeakPointCmd() *cobra.Command {
 			if err := WpSvc.Add(content, urgency, subject); err != nil {
 				return err
 			}
+			afterWrite("添加薄弱点: %s", content)
 			fmt.Printf(render.Green("✅ 已添加薄弱点: %s [%s]\n"), content, urgency)
 			return nil
 		},
@@ -115,6 +116,7 @@ func newWeakPointCmd() *cobra.Command {
 			if err := WpSvc.Delete(idx); err != nil {
 				return err
 			}
+			afterWrite("删除薄弱点")
 			fmt.Println(render.Green("✅ 已删除薄弱点"))
 			return nil
 		},

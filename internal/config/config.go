@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 )
@@ -21,7 +22,9 @@ func GoogleScopes() []string {
 
 // Config 应用配置
 type Config struct {
-	DataDir string // 数据根目录
+	DataDir     string // 数据根目录
+	GitRemote   string // GitHub 仓库地址（不含 token）
+	SyncEnabled bool   // 是否启用云端同步
 }
 
 // DefaultDataDir 返回默认数据目录
@@ -113,4 +116,52 @@ func (c *Config) GenOutputDir() string {
 // 开发时 go run 从项目根目录运行。
 func (c *Config) PythonProjectDir() string {
 	return "coursework-pdf"
+}
+
+// SyncConfigPath 云端同步配置文件路径
+func (c *Config) SyncConfigPath() string {
+	return filepath.Join(c.DataDir, ".sync_config")
+}
+
+// syncConfigFile 同步配置文件的内容结构
+type syncConfigFile struct {
+	GitRemote   string `json:"git_remote"`
+	SyncEnabled bool   `json:"sync_enabled"`
+}
+
+// SaveSyncConfig 保存同步配置到文件
+func (c *Config) SaveSyncConfig() error {
+	sc := syncConfigFile{
+		GitRemote:   c.GitRemote,
+		SyncEnabled: c.SyncEnabled,
+	}
+	data, err := json.MarshalIndent(sc, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(c.SyncConfigPath(), data, 0644)
+}
+
+// LoadSyncConfig 从文件加载同步配置
+func (c *Config) LoadSyncConfig() error {
+	path := c.SyncConfigPath()
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return nil // 文件不存在，使用默认值
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	var sc syncConfigFile
+	if err := json.Unmarshal(data, &sc); err != nil {
+		return err
+	}
+	c.GitRemote = sc.GitRemote
+	c.SyncEnabled = sc.SyncEnabled
+	return nil
+}
+
+// GitEnabled 返回是否启用了云端同步
+func (c *Config) GitEnabled() bool {
+	return c.SyncEnabled && c.GitRemote != ""
 }

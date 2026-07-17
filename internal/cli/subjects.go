@@ -28,6 +28,7 @@ func newSubjectCmd() *cobra.Command {
 			if err := SubjSvc.Add(name); err != nil {
 				return err
 			}
+			afterWrite("添加科目: %s", name)
 			fmt.Printf(render.Green("✅ 已添加科目: %s（资料文件夹已创建）\n"), name)
 			return nil
 		},

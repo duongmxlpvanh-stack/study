@@ -67,8 +67,8 @@ func runInitWizard() error {
 	}
 	fmt.Println()
 
-	// 3. 添加考试
-	fmt.Println(render.Section("⏰ 步骤 2/4: 添加考试日期"))
+	// 2. 添加考试
+	fmt.Println(render.Section("⏰ 步骤 2/5: 添加考试日期"))
 	fmt.Println(render.Dim("  输入考试名称和日期（YYYY-MM-DD），输入空行结束。"))
 	fmt.Println(render.Dim("  例如: 期末考试 2026-07-15"))
 
@@ -102,15 +102,62 @@ func runInitWizard() error {
 	}
 	fmt.Println()
 
-	// 3. 配置 Google 集成（可选）
-	fmt.Println(render.Section("🔗 步骤 3/4: 连接 Google 服务（可选）"))
+	// 3. GitHub 云同步（可选）
+	fmt.Println(render.Section("☁️  步骤 3/5: 配置云端同步 - GitHub（可选）"))
+	fmt.Println(render.Dim("  将学习数据（Markdown 文件）自动同步到 GitHub 私有仓库。"))
+	fmt.Println(render.Dim("  日记数据库 (diary.db) 和资料文件夹不会上传。"))
+	fmt.Println(render.Dim("  每次写操作后将自动在后台推送至远程仓库。"))
+	fmt.Println()
+	fmt.Println(render.Dim("  需要准备:"))
+	fmt.Println(render.Dim("  1. 一个 GitHub 私有仓库（如 https://github.com/你的用户名/study-data）"))
+	fmt.Println(render.Dim("  2. Personal Access Token（repo 权限）"))
+	fmt.Println(render.Dim("     → https://github.com/settings/tokens → Generate new token (classic)"))
+	fmt.Println(render.Dim("  输入空行跳过此步骤，之后可随时用 study sync setup 配置。"))
+	fmt.Println()
+
+	fmt.Printf("  是否配置 GitHub 云同步？(y/N): ")
+	answer, _ := reader.ReadString('\n')
+	answer = strings.TrimSpace(strings.ToLower(answer))
+
+	if answer == "y" || answer == "yes" {
+		fmt.Println()
+		fmt.Printf("  仓库地址（如 https://github.com/user/study-data）: ")
+		repoURL, _ := reader.ReadString('\n')
+		repoURL = strings.TrimSpace(repoURL)
+
+		if repoURL != "" {
+			fmt.Printf("  Personal Access Token: ")
+			token, _ := reader.ReadString('\n')
+			token = strings.TrimSpace(token)
+
+			if token != "" {
+				fmt.Println()
+				fmt.Print(render.Dim("  正在初始化 Git 仓库并同步..."))
+				if err := SyncSvc.Setup(repoURL, token); err != nil {
+					fmt.Println()
+					fmt.Printf("  %s 同步设置失败: %v\n", render.Red("❌"), err)
+					fmt.Println(render.Dim("  可稍后使用 study sync setup 重新配置。"))
+				} else {
+					fmt.Println(render.Green(" ✅"))
+					fmt.Printf("  %s GitHub 云同步已配置！\n", render.Green("✅"))
+					fmt.Println(render.Dim("  每次写操作后将自动推送至远程仓库。"))
+				}
+			}
+		}
+	} else {
+		fmt.Println(render.Dim("  已跳过云端同步。可稍后使用 study sync setup 配置。"))
+	}
+	fmt.Println()
+
+	// 4. 配置 Google 集成（可选）
+	fmt.Println(render.Section("🔗 步骤 4/5: 连接 Google 服务（可选）"))
 	fmt.Println(render.Dim("  连接后可上传文件到 Google Drive 并同步学习计划到 Google Calendar。"))
 	fmt.Println(render.Dim("  需要 Google Cloud Console 中的 OAuth 2.0 客户端凭据（桌面应用类型）。"))
 	fmt.Println(render.Dim("  输入空行跳过此步骤，之后可随时用 study google login 配置。"))
 	fmt.Println()
 
 	fmt.Printf("  是否配置 Google 集成？(y/N): ")
-	answer, _ := reader.ReadString('\n')
+	answer, _ = reader.ReadString('\n')
 	answer = strings.TrimSpace(strings.ToLower(answer))
 
 	if answer == "y" || answer == "yes" {
@@ -157,8 +204,8 @@ func runInitWizard() error {
 	}
 	fmt.Println()
 
-	// 4. 数据目录确认
-	fmt.Println(render.Section("📁 步骤 4/4: 数据存储位置"))
+	// 5. 数据目录确认
+	fmt.Println(render.Section("📁 步骤 5/5: 数据存储位置"))
 	fmt.Printf("  当前数据目录: %s\n", render.Bold(cfg.DataDir))
 	fmt.Println(render.Dim("  如需修改，可设置环境变量 STUDY_DATA_DIR"))
 	fmt.Println(render.Dim("  整个目录复制到新电脑即可迁移所有数据。"))

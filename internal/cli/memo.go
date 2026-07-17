@@ -24,6 +24,7 @@ func newMemoCmd() *cobra.Command {
 			if err := MemoSvc.Add(args[0]); err != nil {
 				return err
 			}
+			afterWrite("添加备忘")
 			fmt.Println(render.Green("✅ 已添加备忘"))
 			return nil
 		},

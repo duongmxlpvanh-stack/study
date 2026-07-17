@@ -28,6 +28,7 @@ func newExamCmd() *cobra.Command {
 			if err := ExamSvc.Add(name, date); err != nil {
 				return err
 			}
+			afterWrite("添加考试: %s (%s)", name, date)
 			fmt.Printf(render.Green("✅ 已添加考试: %s (%s)\n"), name, date)
 			return nil
 		},
@@ -84,6 +85,7 @@ func newExamCmd() *cobra.Command {
 			if err := ExamSvc.Delete(idx); err != nil {
 				return err
 			}
+			afterWrite("删除考试")
 			fmt.Println(render.Green("✅ 已删除考试"))
 			return nil
 		},

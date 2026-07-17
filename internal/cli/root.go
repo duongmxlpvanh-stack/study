@@ -32,6 +32,9 @@ var (
 	DriveSvc    *service.GoogleDriveService
 	CalendarSvc *service.GoogleCalendarService
 
+	// Git 云端同步服务（nil = Git 未安装，IsEnabled() 检查是否已配置仓库）
+	SyncSvc *service.GitSyncService
+
 	// AI 生成服务（nil = 未配置 API key，gen 命令不可用）
 	GenSvc *service.CourseworkService
 
@@ -67,6 +70,11 @@ func Init() {
 
 	// 初始化 AI 生成服务（需要 Python 3.10+ 环境）
 	GenSvc = service.NewCourseworkService(cfg)
+
+	// 初始化 Git 云端同步服务
+	SyncSvc = service.NewGitSyncService(cfg)
+	// 加载同步配置
+	cfg.LoadSyncConfig()
 
 	// 初始化 Google 服务（可选 — 未配置时静默跳过）
 	googleClient, err := auth.NewHTTPClient(context.Background(), config.GoogleScopes())
@@ -126,6 +134,7 @@ func buildRootCmd() *cobra.Command {
 	cmd.AddCommand(newCalendarCmd())
 	cmd.AddCommand(newPathCmd())
 	cmd.AddCommand(newGenCmd())
+	cmd.AddCommand(newSyncCmd())
 
 	return cmd
 }
